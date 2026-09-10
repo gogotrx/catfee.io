@@ -1,0 +1,8 @@
+# Review and replace both example networks before running these commands.
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow from 10.0.0.0/24 to any port 50051 proto tcp comment 'TronLink gRPC LAN'
+ufw allow from 10.0.0.0/24 to any port 22 proto tcp comment 'SSH admin LAN'
+ufw deny 8080/tcp
+ufw deny 8787/tcp
+ufw enable

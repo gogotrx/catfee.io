@@ -1,0 +1,31 @@
+[Unit]
+Description=TRON Seamless Resource gRPC Gateway
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tron-seamless
+Group=tron-seamless
+WorkingDirectory=/opt/tron-seamless
+EnvironmentFile=/etc/tron-seamless/gateway.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/tron-seamless/dist/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=75
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

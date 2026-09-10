@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#0b1739" />
+    <meta
+      name="description"
+      content="TRON 无感资源网关局域网管理后台，用于查看状态、维护地址与使用次数。"
+    />
+    <title>TRON 无感资源网关</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <path d="M8 10.5 39.5 7 29 39 8 10.5Z" />
+              <path d="m8 10.5 17 8.3L39.5 7M25 18.8 29 39" />
+            </svg>
+          </span>
+          <span>
+            <strong>TRON 资源中心</strong>
+            <small>Seamless Gateway</small>
+          </span>
+        </div>
+
+        <nav class="nav-list">
+          <a class="nav-item is-active" href="#overview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z" /></svg>
+            运行概览
+          </a>
+          <a class="nav-item" href="#bindings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0h14Zm2-8h-5v2h5v-2Z" /></svg>
+            地址管理
+          </a>
+          <a class="nav-item" href="#providers">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v5H4V4Zm1 7h14v9H5v-9Zm3 2v5h3v-5H8Zm5 0v2h4v-2h-4Z" /></svg>
+            能量供应商
+          </a>
+          <a class="nav-item" href="#requests">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 5h10V6H7v2Zm0 5h10v-2H7v2Zm0 5h7v-2H7v2Z" /></svg>
+            最近请求
+          </a>
+        </nav>
+
+        <div class="sidebar-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 5.1 3.8 9.8 9 11 5.2-1.2 9-5.9 9-11V6l-9-4Zm0 3.2 6 2.6V12c0 3.5-2.4 6.8-6 7.9-3.6-1.1-6-4.4-6-7.9V7.8l6-2.6Z" /></svg>
+          <div>
+            <strong>密钥隔离</strong>
+            <p>本页面绝不会要求资源钱包或用户钱包私钥。</p>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main-column">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">局域网管理后台</p>
+            <h1>无感资源网关</h1>
+          </div>
+          <div class="topbar-actions">
+            <span id="connection-pill" class="connection-pill is-offline">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span id="connection-text">未连接</span>
+            </span>
+            <button id="refresh-button" class="icon-button" type="button" title="立即刷新" aria-label="立即刷新">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.3L13 11h8V3l-3.3 3.3Z" /></svg>
+            </button>
+            <button id="logout-button" class="button button-ghost" type="button">退出</button>
+          </div>
+        </header>
+
+        <main id="main-content" tabindex="-1">
+          <section id="observe-warning" class="alert alert-observe" role="alert">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22L12 2Zm1 15h-2v2h2v-2Zm0-7h-2v5h2v-5Z" /></svg>
+            <div>
+              <strong id="observe-warning-title">尚未确认运行模式</strong>
+              <p id="observe-warning-text">确认服务端状态前，请按无资源赞助处理。广播仍会提交至 Mainnet，可能产生真实链上交易。</p>
+            </div>
+          </section>
+
+          <section class="alert alert-mainnet" aria-label="Mainnet 安全提示">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z" /></svg>
+            <p><strong>Mainnet 环境：</strong>启用地址只会改变赞助资格，不会撤销已经签名或广播的交易。请先使用小额测试地址。</p>
+          </section>
+
+          <section class="alert alert-transport" aria-label="传输安全提示">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9h14v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V7Zm7 11H7v-7h10v7Z" /></svg>
+            <p><strong>安全连接：</strong>仅通过 HTTPS 或 SSH 隧道打开本后台。管理 Token 只保存在页面内存中，刷新或关闭页面后立即清除。</p>
+          </section>
+
+          <section id="overview" class="section-block" aria-labelledby="overview-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">OVERVIEW</p>
+                <h2 id="overview-heading">运行概览</h2>
+              </div>
+              <div class="refresh-control">
+                <label for="refresh-interval">自动刷新</label>
+                <select id="refresh-interval">
+                  <option value="5000">每 5 秒</option>
+                  <option value="15000" selected>每 15 秒</option>
+                  <option value="30000">每 30 秒</option>
+                  <option value="0">关闭</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="status-grid">
+              <article class="metric-card metric-mode">
+                <span class="metric-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5.1 3.8 9.8 9 11 5.2-1.2 9-5.9 9-11V6l-9-4Zm0 4 5 2.2V12c0 2.8-1.9 5.7-5 6.8-3.1-1.1-5-4-5-6.8V8.2L12 6Z" /></svg>
+                </span>
+                <div>
+                  <span class="metric-label">运行模式</span>
+                  <strong id="metric-mode">--</strong>
+                  <small id="metric-mode-detail">等待状态数据</small>
+                </div>
+              </article>
+              <article class="metric-card">
+                <span class="metric-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M4 4h16v6H4V4Zm3 2v2h2V6H7Zm-3 8h16v6H4v-6Zm3 2v2h2v-2H7Z" /></svg>
+                </span>
+                <div>
+                  <span class="metric-label">网关状态</span>
+                  <strong id="metric-gateway">--</strong>
+                  <small id="metric-gateway-detail">尚未连接</small>
+                </div>
+              </article>
+              <article class="metric-card">
+                <span class="metric-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9Zm1 4v4.6l3.2 1.9-1 1.7L11 12.7V7h2Z" /></svg>
+                </span>
+                <div>
+                  <span class="metric-label">最近同步</span>
+                  <strong id="metric-updated">--</strong>
+                  <small id="metric-updated-detail">等待刷新</small>
+                </div>
+              </article>
+              <article class="metric-card">
+                <span class="metric-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3ZM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3Zm8 2c-1.3 0-2.4.3-3.4.8A6 6 0 0 1 15 18v1h7v-1c0-2.8-2.7-5-6-5Zm-8 0c-3.3 0-6 2.2-6 5v1h12v-1c0-2.8-2.7-5-6-5Z" /></svg>
+                </span>
+                <div>
+                  <span class="metric-label">绑定地址</span>
+                  <strong id="metric-bindings">--</strong>
+                  <small id="metric-bindings-detail">0 个已启用</small>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section id="providers" class="panel" aria-labelledby="providers-heading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ENERGY PROVIDERS</p>
+                <h2 id="providers-heading">能量供应商</h2>
+                <p>每个供应商独立保存配置和订单。首家接入快租；API Endpoint 由服务端固定，网页不可修改。</p>
+              </div>
+              <button id="add-provider-button" class="button button-primary" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z" /></svg>
+                添加供应商
+              </button>
+            </div>
+            <div class="provider-help">
+              <span><strong>rentTime = 1</strong> 表示租用 1 小时</span>
+              <span><strong>rentTime = 15</strong> 表示租用 15 分钟</span>
+              <span><strong>快租套餐</strong> 仅支持 65,000 / 131,000 ENERGY，按可调整的原始预估阈值选档</span>
+              <span>余额和参考价格仅在手动点击后查询，不会自动轮询</span>
+              <span>API Key 提交后不会回显</span>
+            </div>
+            <div class="provider-budget" aria-labelledby="provider-budget-title">
+              <div class="provider-budget-heading">
+                <div>
+                  <p class="eyebrow">GLOBAL RISK BUDGET</p>
+                  <h3 id="provider-budget-title">当日全局付费额度</h3>
+                </div>
+                <span id="provider-budget-window" class="badge badge-info">UTC 自然日</span>
+              </div>
+              <div class="provider-budget-grid">
+                <article class="budget-item">
+                  <span>订单次数</span>
+                  <strong><b id="provider-budget-used-orders">--</b> / <b id="provider-budget-order-limit">--</b></strong>
+                  <small>剩余 <b id="provider-budget-remaining-orders">--</b> 单</small>
+                  <div class="quota-track" aria-hidden="true"><i id="provider-budget-orders-bar" class="quota-bar quota-width-0"></i></div>
+                </article>
+                <article class="budget-item">
+                  <span>ENERGY 总量</span>
+                  <strong><b id="provider-budget-used-energy">--</b> / <b id="provider-budget-energy-limit">--</b></strong>
+                  <small>剩余 <b id="provider-budget-remaining-energy">--</b> ENERGY</small>
+                  <div class="quota-track" aria-hidden="true"><i id="provider-budget-energy-bar" class="quota-bar quota-width-0"></i></div>
+                </article>
+                <article class="budget-item budget-item-limit">
+                  <span>单笔 ENERGY 上限</span>
+                  <strong id="provider-budget-per-order">--</strong>
+                  <small>超出时会在外呼前安全拒绝</small>
+                </article>
+              </div>
+              <p class="provider-budget-note">预算在请求供应商之前由数据库原子检查；ORDERING、ACCEPTED、FULFILLED、UNKNOWN 均占用额度，只有明确拒绝才释放。</p>
+            </div>
+            <div id="providers-grid" class="providers-grid"></div>
+            <div id="providers-empty" class="empty-state" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v5H4V4Zm1 7h14v9H5v-9Zm3 2v5h3v-5H8Z" /></svg>
+              <strong>尚未配置能量供应商</strong>
+              <p>添加快租供应商并填写 API Key 后再进行低风险测试。</p>
+            </div>
+
+            <div class="subsection-heading">
+              <div>
+                <h3>供应商订单</h3>
+                <p>每次只查看一家供应商，避免不同供应商的数据混在一起。</p>
+              </div>
+              <label class="provider-filter" for="provider-order-filter">
+                <span>当前供应商</span>
+                <select id="provider-order-filter" aria-label="筛选供应商订单"></select>
+              </label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">订单</th>
+                    <th scope="col">接收地址</th>
+                    <th scope="col">资源 / 数量</th>
+                    <th scope="col">状态</th>
+                    <th scope="col">更新时间</th>
+                  </tr>
+                </thead>
+                <tbody id="provider-orders-body"></tbody>
+              </table>
+              <div id="provider-orders-empty" class="empty-state" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h12v3h3v17H3V5h3V2Zm2 3h8V4H8v1Zm-3 2v13h14V7H5Zm3 3h8v2H8v-2Zm0 4h8v2H8v-2Z" /></svg>
+                <strong>当前供应商暂无订单</strong>
+                <p>创建能量租用订单后，记录会显示在这里。</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="bindings" class="panel" aria-labelledby="bindings-heading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ACCESS CONTROL</p>
+                <h2 id="bindings-heading">地址与次数</h2>
+                <p>只有启用且未过期、次数尚有余量的地址能够获得资源赞助。</p>
+              </div>
+              <button id="add-binding-button" class="button button-primary" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z" /></svg>
+                添加地址
+              </button>
+            </div>
+
+            <div class="table-toolbar">
+              <label class="search-field" for="binding-search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 19.6-4.8-4.8a7 7 0 1 0-1.4 1.4l4.8 4.8 1.4-1.4ZM5 10.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" /></svg>
+                <input id="binding-search" type="search" placeholder="搜索地址或备注" autocomplete="off" />
+              </label>
+              <span id="binding-summary" class="table-summary">等待数据</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">地址 / 备注</th>
+                    <th scope="col">状态</th>
+                    <th scope="col">次数</th>
+                    <th scope="col">有效期</th>
+                    <th scope="col" class="actions-column">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="bindings-body"></tbody>
+              </table>
+              <div id="bindings-empty" class="empty-state" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c5 0 9 1.8 9 4v10c0 2.2-4 4-9 4s-9-1.8-9-4V7c0-2.2 4-4 9-4Zm0 2C7.6 5 5 6.4 5 7s2.6 2 7 2 7-1.4 7-2-2.6-2-7-2Zm-7 5v2c0 .6 2.6 2 7 2s7-1.4 7-2v-2c-1.7.7-4.2 1-7 1s-5.3-.3-7-1Zm0 5v2c0 .6 2.6 2 7 2s7-1.4 7-2v-2c-1.7.7-4.2 1-7 1s-5.3-.3-7-1Z" /></svg>
+                <strong>还没有绑定地址</strong>
+                <p>添加一个低风险测试地址开始验证流程。</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="requests" class="panel" aria-labelledby="requests-heading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ACTIVITY</p>
+                <h2 id="requests-heading">最近请求</h2>
+                <p>展示最近 50 条广播请求。交易最终状态应以 SolidityNode 固化结果为准。</p>
+              </div>
+              <span id="request-count" class="count-badge">0 条</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">交易 / 地址</th>
+                    <th scope="col">状态</th>
+                    <th scope="col">能量预估</th>
+                    <th scope="col">带宽预检</th>
+                    <th scope="col">链上实绩</th>
+                    <th scope="col">更新时间</th>
+                  </tr>
+                </thead>
+                <tbody id="requests-body"></tbody>
+              </table>
+              <div id="requests-empty" class="empty-state" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 5h10V6H7v2Zm0 5h10v-2H7v2Zm0 5h7v-2H7v2Z" /></svg>
+                <strong>暂无请求记录</strong>
+                <p>通过网关提交请求后，记录会显示在这里。</p>
+              </div>
+            </div>
+          </section>
+
+          <footer>
+            <span>TRON 无感资源网关</span>
+            <span>·</span>
+            <span>局域网自建版</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <div id="login-screen" class="login-screen" role="dialog" aria-modal="true" aria-labelledby="login-title">
+      <form id="login-form" class="login-card">
+        <span class="login-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M8 10.5 39.5 7 29 39 8 10.5Z" /><path d="m8 10.5 17 8.3L39.5 7M25 18.8 29 39" /></svg>
+        </span>
+        <p class="eyebrow">SECURE ADMIN</p>
+        <h2 id="login-title">连接管理后台</h2>
+        <p class="login-intro">输入服务器生成的管理 Access Token。它只保存在当前页面的 JS 内存中，刷新后需要重新输入。</p>
+        <label class="field-label" for="token-input">管理 Access Token</label>
+        <div class="password-field">
+          <input
+            id="token-input"
+            name="token"
+            type="password"
+            required
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="粘贴 ADMIN_TOKEN"
+          />
+          <button id="toggle-token-button" type="button" aria-label="显示 Token" title="显示或隐藏 Token">
+            <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.5 0 9.5 5.3 9.7 5.5l.7 1-.7 1C20.5 14 17.1 19 12 19S3.5 14 2.3 12.5l-.7-1 .7-1C2.5 10.3 6.5 5 12 5Zm0 2c-3.6 0-6.6 3-7.6 4.5C5.5 13 8.4 17 12 17s6.5-4 7.6-5.5C18.6 10 15.6 7 12 7Zm0 1a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm0 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" /></svg>
+          </button>
+        </div>
+        <p id="login-error" class="form-error" role="alert" hidden></p>
+        <button id="login-button" class="button button-primary button-full" type="submit">安全连接</button>
+        <div class="login-safety">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 5.1 3.8 9.8 9 11 5.2-1.2 9-5.9 9-11V6l-9-4Zm0 3.2 6 2.6V12c0 3.5-2.4 6.8-6 7.9-3.6-1.1-6-4.4-6-7.9V7.8l6-2.6Z" /></svg>
+          <span>只输入管理 Token。任何页面索要钱包助记词或私钥时，请立即停止。</span>
+        </div>
+        <p class="login-transport">仅通过 HTTPS 或 SSH 隧道使用本页面，禁止在明文公网 HTTP 中输入 Token。</p>
+      </form>
+    </div>
+
+    <dialog id="binding-dialog" class="modal">
+      <form id="binding-form" method="dialog">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">ADDRESS RULE</p>
+            <h2 id="binding-dialog-title">添加绑定地址</h2>
+          </div>
+          <button class="icon-button modal-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z" /></svg>
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <label class="form-field form-field-wide">
+            <span>TRON 地址 <em>*</em></span>
+            <input id="binding-address" name="address" type="text" required autocomplete="off" spellcheck="false" placeholder="T 开头的 Mainnet 地址" maxlength="64" />
+            <small>这里只填写公开地址，不要输入私钥或助记词。</small>
+          </label>
+          <label class="form-field form-field-wide">
+            <span>备注</span>
+            <input id="binding-label" name="label" type="text" autocomplete="off" maxlength="200" placeholder="例如：财务测试机" />
+          </label>
+          <label class="form-field">
+            <span>次数规则</span>
+            <select id="binding-limit-mode" name="limitMode">
+              <option value="limited">限制总次数</option>
+              <option id="binding-unlimited-option" value="unlimited">不限制次数</option>
+            </select>
+          </label>
+          <label id="binding-limit-field" class="form-field">
+            <span>最多交易次数 <em>*</em></span>
+            <input id="binding-limit" name="maxTransactions" type="number" min="0" max="1000000" step="1" inputmode="numeric" value="10" required />
+          </label>
+          <p id="binding-paid-quota-notice" class="paid-quota-notice form-field-wide" hidden>当前为外部供应商付费赞助模式，必须设置有限总次数，不能使用“不限次数”。</p>
+          <label class="form-field form-field-wide">
+            <span>到期时间</span>
+            <input id="binding-expires" name="expiresAt" type="datetime-local" />
+            <small>留空表示长期有效；时间按当前设备时区填写。</small>
+          </label>
+          <label class="toggle-field form-field-wide">
+            <input id="binding-enabled" name="enabled" type="checkbox" checked />
+            <span class="switch" aria-hidden="true"></span>
+            <span>
+              <strong>立即启用</strong>
+              <small>关闭后保存规则，但不会给予资源赞助。</small>
+            </span>
+          </label>
+        </div>
+
+        <p id="binding-form-error" class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button class="button button-ghost modal-close" type="button">取消</button>
+          <button id="binding-save-button" class="button button-primary" type="submit">保存地址</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="reset-dialog" class="modal modal-small">
+      <form id="reset-form" method="dialog">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">RESET USAGE</p>
+            <h2>重置使用次数</h2>
+          </div>
+          <button class="icon-button modal-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z" /></svg>
+          </button>
+        </div>
+        <p class="modal-copy">地址 <code id="reset-address"></code> 的已用次数将归零并重新授予付费容量；这不会撤销历史扣费。存在进行中或待人工核对的供应商订单时，服务器会拒绝此操作。</p>
+        <div class="reset-summary">
+          <span>当前已用 <strong id="reset-current-used">0</strong></span>
+          <span>处理中 <strong id="reset-current-reserved">0</strong></span>
+          <span>当前上限 <strong id="reset-current-max">不限</strong></span>
+        </div>
+        <label class="form-field">
+          <span>重置后的次数规则</span>
+          <select id="reset-limit-mode">
+            <option value="limited">限制总次数</option>
+            <option id="reset-unlimited-option" value="unlimited">不限制次数</option>
+          </select>
+        </label>
+        <label id="reset-limit-field" class="form-field">
+          <span>最多交易次数 <em>*</em></span>
+          <input id="reset-limit" type="number" min="0" max="1000000" step="1" inputmode="numeric" required />
+        </label>
+        <p id="reset-paid-quota-notice" class="paid-quota-notice" hidden>外部供应商付费赞助模式必须设置有限总次数。</p>
+        <p id="reset-open-order-warning" class="paid-quota-notice paid-quota-danger" hidden></p>
+        <p id="reset-form-error" class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button class="button button-ghost modal-close" type="button">取消</button>
+          <button id="reset-save-button" class="button button-danger" type="submit">确认重置</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="provider-dialog" class="modal">
+      <form id="provider-form" method="dialog">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">PROVIDER SETTINGS</p>
+            <h2 id="provider-dialog-title">添加能量供应商</h2>
+          </div>
+          <button class="icon-button modal-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z" /></svg>
+          </button>
+        </div>
+        <div class="form-grid">
+          <label class="form-field">
+            <span>供应商类型</span>
+            <select id="provider-type">
+              <option value="kuaizu">快租</option>
+            </select>
+          </label>
+          <label class="form-field">
+            <span>显示名称 <em>*</em></span>
+            <input id="provider-name" type="text" required maxlength="100" value="快租" autocomplete="off" />
+          </label>
+          <div class="form-field form-field-wide endpoint-field">
+            <span>API Endpoint</span>
+            <code>https://api.kuaizu.io/api/rent</code>
+            <small>固定只读，不会作为表单字段提交。</small>
+          </div>
+          <label class="form-field">
+            <span>优先级 <em>*</em></span>
+            <input id="provider-priority" type="number" required min="0" max="1000000" step="1" value="100" inputmode="numeric" />
+            <small>数值越小优先级越高。</small>
+          </label>
+          <label class="form-field">
+            <span>租用时长 <em>*</em></span>
+            <select id="provider-rent-time">
+              <option value="15">15 分钟（rentTime = 15）</option>
+              <option value="1">1 小时（rentTime = 1）</option>
+            </select>
+          </label>
+          <label class="form-field">
+            <span>单笔 ENERGY 上限 <em>*</em></span>
+            <input id="provider-max-energy-per-order" type="number" required min="1" max="131000" step="1" value="131000" inputmode="numeric" />
+            <small>快租最高套餐为 131,000；预算按实际购买套餐数量扣减。</small>
+          </label>
+          <label class="form-field">
+            <span>每日订单上限 <em>*</em></span>
+            <input id="provider-daily-order-limit" type="number" required min="1" max="1000000" step="1" value="10" inputmode="numeric" />
+            <small>按 UTC 自然日独立统计。</small>
+          </label>
+          <label class="form-field form-field-wide">
+            <span>每日 ENERGY 上限 <em>*</em></span>
+            <input id="provider-daily-energy-limit" type="number" required min="1" max="1000000000000" step="1" value="1000000" inputmode="numeric" />
+            <small>必须大于或等于单笔上限；与全局预算同时生效，先触达者先拒绝。</small>
+          </label>
+          <label class="form-field form-field-wide">
+            <span>供应商 API Key <em id="provider-api-key-required">*</em></span>
+            <input id="provider-api-key" type="password" autocomplete="off" spellcheck="false" placeholder="输入后只提交一次，不会回显" />
+            <small id="provider-api-key-help">新建供应商时必须填写；保存后服务端只返回“已配置”状态。</small>
+          </label>
+          <label class="toggle-field form-field-wide">
+            <input id="provider-enabled" type="checkbox" disabled />
+            <span class="switch" aria-hidden="true"></span>
+            <span>
+              <strong>当前启用状态</strong>
+              <small>新供应商固定以停用状态创建；保存并复核后，只能从供应商卡片独立启用。</small>
+            </span>
+          </label>
+        </div>
+        <p id="provider-form-error" class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button class="button button-ghost modal-close" type="button">取消</button>
+          <button id="provider-save-button" class="button button-primary" type="submit">保存供应商</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>

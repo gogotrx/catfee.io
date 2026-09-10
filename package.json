@@ -1,0 +1,39 @@
+{
+  "name": "tron-seamless-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A self-hosted TRON gRPC gateway that prepares delegated resources before forwarding signed transactions.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "signer": "node dist/signer-server.js",
+    "signer:dev": "tsx watch src/signer-server.ts",
+    "admin": "tsx src/admin-cli.ts",
+    "migrate": "tsx src/migrate.ts",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run --dir test",
+    "test:watch": "vitest --dir test"
+  },
+  "dependencies": {
+    "bs58check": "4.0.0",
+    "ethers": "6.17.0",
+    "pg": "8.23.0",
+    "pino": "10.3.1",
+    "protobufjs": "8.8.0",
+    "tronweb": "6.5.0",
+    "zod": "4.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "@types/pg": "8.18.0",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
+  }
+}

@@ -1,0 +1,32 @@
+[Unit]
+Description=TRON Seamless Resource Local Signer
+After=network.target
+Before=seamless-gateway.service
+
+[Service]
+Type=simple
+User=tron-signer
+Group=tron-signer
+WorkingDirectory=/opt/tron-seamless
+EnvironmentFile=/etc/tron-seamless/signer.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/tron-seamless/dist/signer-server.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+IPAddressAllow=localhost
+IPAddressDeny=any
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
